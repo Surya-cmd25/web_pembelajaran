@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'level', 'placed', 'is_completed'])]
+#[Fillable(['user_id', 'level', 'placed', 'is_completed', 'best_seconds'])]
 class PuzzleProgress extends Model
 {
     /** @use HasFactory<PuzzleProgressFactory> */

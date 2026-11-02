@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\ConceptCard;
+use App\Models\PuzzleLevel;
 use App\Models\PuzzleProgress;
 use App\Models\Recording;
 use App\Models\User;
@@ -77,8 +78,20 @@ class StudentFeaturesTest extends TestCase
         $this->assertTrue($user->fresh()->hasCompleted('galeri'));
     }
 
+    private function level(int $number = 1, int $rows = 2, int $cols = 5): PuzzleLevel
+    {
+        return PuzzleLevel::create([
+            'level' => $number,
+            'title' => 'Level '.$number,
+            'rows' => $rows,
+            'cols' => $cols,
+            'time_limit' => 300,
+        ]);
+    }
+
     public function test_siswa_can_save_puzzle_progress(): void
     {
+        $this->level(1);
         $user = User::factory()->create();
 
         $this->actingAs($user)->postJson(route('puzzle.save'), [
@@ -94,8 +107,9 @@ class StudentFeaturesTest extends TestCase
         ]);
     }
 
-    public function test_completed_puzzle_requires_ten_pieces(): void
+    public function test_completed_puzzle_requires_all_pieces(): void
     {
+        $this->level(2);
         $user = User::factory()->create();
 
         $this->actingAs($user)->postJson(route('puzzle.save'), [
@@ -109,13 +123,15 @@ class StudentFeaturesTest extends TestCase
 
     public function test_full_puzzle_marks_activity_complete(): void
     {
+        $this->level(3);
         $user = User::factory()->create();
 
         $this->actingAs($user)->postJson(route('puzzle.save'), [
             'level' => 3,
             'placed' => range(0, 9),
             'is_completed' => true,
-        ])->assertOk()->assertJson(['saved' => true, 'is_completed' => true]);
+            'seconds' => 95,
+        ])->assertOk()->assertJson(['saved' => true, 'is_completed' => true, 'best_seconds' => 95]);
 
         $this->assertTrue($user->fresh()->hasCompleted('puzzle'));
         $this->assertTrue(PuzzleProgress::where('user_id', $user->id)->where('level', 3)->value('is_completed'));
@@ -123,6 +139,7 @@ class StudentFeaturesTest extends TestCase
 
     public function test_puzzle_rejects_invalid_level(): void
     {
+        $this->level(1);
         $user = User::factory()->create();
 
         $this->actingAs($user)->postJson(route('puzzle.save'), [

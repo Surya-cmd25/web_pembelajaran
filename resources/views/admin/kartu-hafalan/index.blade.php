@@ -58,7 +58,6 @@
                             <tr class="hover:bg-gray-50/60 transition-colors">
                                 <td class="px-5 py-4">
                                     <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {{ $colorChip[$card->color] ?? $colorChip['blue'] }}">
-                                        <span class="w-2 h-2 rounded-full {{ $colorDot[$card->color] ?? $colorDot['blue'] }}"></span>
                                         {{ $card->name }}
                                     </span>
                                 </td>

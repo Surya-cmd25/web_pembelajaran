@@ -4,7 +4,7 @@
         <p class="text-xs sm:text-sm text-gray-500 mt-1">Buat materi pembelajaran baru untuk siswa.</p>
     </div>
 
-    <form method="POST" action="{{ route('admin.materi.store') }}">
+    <form method="POST" action="{{ route('admin.materi.store') }}" enctype="multipart/form-data">
         @csrf
         @include('admin.materi.form', ['submitLabel' => 'Simpan Materi'])
     </form>

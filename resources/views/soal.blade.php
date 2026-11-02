@@ -1,213 +1,100 @@
 <x-dashboard-layout title="Soal Pilihan Ganda" active="soal">
-    {{-- Page heading --}}
-    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-        <div>
-            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 uppercase tracking-wider">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Uji Pemahaman
-            </span>
-            <h2 class="text-2xl sm:text-[28px] font-extrabold text-gray-900 tracking-tight mt-1">Soal Pilihan Ganda</h2>
-            <p class="text-xs sm:text-sm text-gray-500 mt-1">
-                Jawab {{ $questions->count() }} soal situasi sosial di bawah ini, lalu lihat hasil dan pembahasannya.
-            </p>
-        </div>
-        <div class="flex items-center gap-2.5 self-start sm:self-auto">
-            @if ($latestAttempt)
-                <span class="px-3.5 py-1.5 rounded-full border border-gray-200 bg-white text-gray-700 text-xs font-bold shadow-2xs">
-                    Skor terakhir: {{ $latestAttempt->score }}/{{ $latestAttempt->total }}
-                </span>
-            @endif
-            <span class="px-3.5 py-1.5 rounded-full border border-blue-100 bg-blue-50 text-blue-700 text-xs font-bold shadow-2xs">
-                {{ $questions->count() }} Soal
-            </span>
-        </div>
+    <div>
+        <h2 class="text-2xl sm:text-[28px] font-extrabold text-gray-900 tracking-tight mt-1">Soal Pilihan Ganda</h2>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">Pilih kartu di bawah untuk melihat keterangan soal, lalu mulai mengerjakan.</p>
     </div>
 
-    {{-- Progress / result summary --}}
-    <section id="scoreBox" class="{{ $latestAttempt ? '' : 'hidden' }} bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-5 sm:p-6">
-        <div class="flex flex-col sm:flex-row sm:items-center gap-4 justify-between">
-            <div class="flex items-center gap-4">
-                <div id="scoreRing" class="w-16 h-16 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg font-extrabold">
-                    @if ($latestAttempt){{ $latestAttempt->score }}/{{ $latestAttempt->total }}@endif
-                </div>
-                <div>
-                    <h3 class="text-base font-extrabold text-gray-900">Hasil Terakhir</h3>
-                    <p id="scoreText" class="text-xs text-gray-500 mt-0.5">
-                        @if ($latestAttempt)
-                            Kamu menjawab benar {{ $latestAttempt->score }} dari {{ $latestAttempt->total }} soal. Ayo coba lagi untuk skor lebih tinggi!
-                        @else
-                            Belum ada hasil.
-                        @endif
-                    </p>
+    @if (session('status'))
+        <div class="rounded-2xl bg-amber-50 text-amber-700 border border-amber-200/80 px-4 py-3 text-sm font-bold">{{ session('status') }}</div>
+    @endif
+
+    {{-- Kartu soal --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+        <button type="button" id="openSoalModal"
+            class="group text-left bg-white rounded-3xl border border-gray-200/80 shadow-2xs hover:shadow-md hover:-translate-y-0.5 overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 ring-blue-400">
+            <div class="h-32 bg-gradient-to-br from-blue-600 to-blue-800 relative overflow-hidden flex items-center justify-center">
+                <div class="pointer-events-none absolute -right-8 -top-8 w-32 h-32 rounded-full bg-white/10"></div>
+                <div class="pointer-events-none absolute -left-6 -bottom-10 w-28 h-28 rounded-full bg-white/10"></div>
+                <svg class="relative w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <div class="p-5">
+                <h3 class="text-base font-extrabold text-gray-900 group-hover:text-blue-600 transition-colors">Evaluasi Norma Sosial</h3>
+                <p class="text-xs text-gray-500 leading-relaxed mt-1.5 line-clamp-2">{{ $description }}</p>
+                <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
+                    <span class="font-semibold text-gray-500">{{ $questionCount }} soal · {{ $durationMinutes }} menit</span>
+                    <span class="font-bold text-blue-600">Buka →</span>
                 </div>
             </div>
-            <button id="retryBtn" type="button"
-                class="px-5 py-2.5 rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 text-xs font-bold transition-colors">
-                Ulangi Dari Awal
-            </button>
-        </div>
-    </section>
+        </button>
+    </div>
 
-    {{-- Question form --}}
-    <form id="soalForm" class="space-y-5">
-        @forelse ($questions as $index => $item)
-            <fieldset data-question-id="{{ $item['id'] }}"
-                class="question-card bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-5 sm:p-6">
-                <legend class="sr-only">Soal {{ $index + 1 }}</legend>
-
-                <div class="flex items-start gap-3.5">
-                    <span class="w-8 h-8 rounded-xl bg-slate-900 text-white text-sm font-extrabold flex items-center justify-center shrink-0">
-                        {{ $index + 1 }}
-                    </span>
-                    <div class="min-w-0 flex-1">
-                        <p class="text-sm sm:text-[15px] font-semibold text-gray-900 leading-relaxed">
-                            {{ $item['question'] }}
-                        </p>
-
-                        <div class="option-list mt-4 space-y-2.5">
-                            @foreach ($item['options'] as $optionIndex => $option)
-                                <label class="option-item flex items-start gap-3 rounded-2xl border border-gray-200 bg-white px-4 py-3 cursor-pointer transition-all hover:border-blue-300 hover:bg-blue-50/40">
-                                    <input type="radio" name="answers[{{ $item['id'] }}]" value="{{ $optionIndex }}"
-                                        class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 shrink-0">
-                                    <span class="text-sm text-gray-700 leading-snug option-label">
-                                        <span class="font-bold text-gray-500 mr-1.5">{{ chr(65 + $optionIndex) }}.</span>{{ $option }}
-                                    </span>
-                                </label>
-                            @endforeach
-                        </div>
-
-                        <p class="explanation hidden mt-3 text-xs text-gray-600 bg-slate-50 border border-slate-100 rounded-xl p-3"></p>
+    {{-- Riwayat --}}
+    @if ($attempts->isNotEmpty())
+        <section class="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-5 sm:p-6">
+            <h3 class="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-2">Riwayat pengerjaan</h3>
+            @foreach ($attempts as $attempt)
+                @php($pct = $attempt->total > 0 ? round($attempt->score / $attempt->total * 100) : 0)
+                <div class="flex items-center justify-between gap-3 py-3 border-b border-gray-100 last:border-0">
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">Nilai {{ $pct }} <span class="text-xs font-semibold text-gray-400">({{ $attempt->score }}/{{ $attempt->total }} benar)</span></p>
+                        <p class="text-[11px] text-gray-400">{{ $attempt->created_at->translatedFormat('d F Y, H:i') }}</p>
                     </div>
+                    <a href="{{ route('soal.hasil', $attempt) }}" class="px-3.5 py-1.5 rounded-lg border border-gray-200 text-xs font-bold text-gray-700 hover:border-blue-300 hover:text-blue-600 transition-all">
+                        Lihat Pembahasan
+                    </a>
                 </div>
-            </fieldset>
-        @empty
-            <div class="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-10 text-center">
-                <p class="text-sm font-semibold text-gray-500">Belum ada soal tersedia. Guru sedang menyiapkan soalnya.</p>
-            </div>
-        @endforelse
+            @endforeach
+        </section>
+    @endif
 
-        @if ($questions->isNotEmpty())
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-end">
-                <span id="answeredHint" class="text-xs font-semibold text-gray-400 sm:mr-auto">0 dari {{ $questions->count() }} soal terjawab</span>
-                <button id="submitBtn" type="submit"
-                    class="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none">
-                    Kumpulkan Jawaban
-                </button>
+    {{-- Popup keterangan --}}
+    <div id="soalModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div id="soalModalBackdrop" class="absolute inset-0 bg-slate-900/50 backdrop-blur-xs"></div>
+        <div class="relative w-full max-w-md bg-white rounded-3xl border border-gray-200 shadow-2xl p-6">
+            <button id="soalModalClose" type="button" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center" aria-label="Tutup">
+                <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+            <span class="text-[11px] font-extrabold uppercase tracking-wider text-blue-600">Keterangan Soal</span>
+            <h3 class="text-xl font-extrabold text-gray-900 mt-1">Evaluasi Norma Sosial</h3>
+            <p class="text-sm text-gray-600 leading-relaxed mt-2">{{ $description }}</p>
+
+            <div class="grid grid-cols-2 gap-3 mt-5">
+                <div class="rounded-2xl bg-blue-50/70 border border-blue-100 p-4">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-blue-600">Jumlah Soal</p>
+                    <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ $questionCount }}</p>
+                </div>
+                <div class="rounded-2xl bg-amber-50/70 border border-amber-100 p-4">
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-amber-600">Durasi</p>
+                    <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ $durationMinutes }} <span class="text-sm font-bold text-gray-500">menit</span></p>
+                </div>
             </div>
-        @endif
-    </form>
+
+            <ul class="mt-4 space-y-1.5 text-xs text-gray-600">
+                <li>• Waktu berjalan begitu kamu menekan tombol mulai.</li>
+                <li>• Saat waktu habis, jawaban otomatis dikumpulkan.</li>
+                <li>• Setelah selesai, nilai dikirim ke guru dan kamu bisa memeriksa jawaban yang salah dan yang benar.</li>
+            </ul>
+
+            @if ($questionCount > 0)
+                <a href="{{ route('soal.kerjakan') }}" class="mt-6 flex justify-center w-full px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold shadow-lg shadow-blue-500/25 transition-colors">
+                    Mulai Mengerjakan
+                </a>
+            @else
+                <p class="mt-6 text-center text-sm font-semibold text-gray-500">Belum ada soal tersedia. Guru sedang menyiapkannya.</p>
+            @endif
+        </div>
+    </div>
 
     @push('scripts')
         <script>
             document.addEventListener('DOMContentLoaded', () => {
-                const form = document.getElementById('soalForm');
-                const submitBtn = document.getElementById('submitBtn');
-                const answeredHint = document.getElementById('answeredHint');
-                const scoreBox = document.getElementById('scoreBox');
-                const scoreRing = document.getElementById('scoreRing');
-                const scoreText = document.getElementById('scoreText');
-                const retryBtn = document.getElementById('retryBtn');
-                const totalQuestions = {{ $questions->count() }};
-                let submitting = false;
-
-                const countAnswered = () => {
-                    const ids = new Set();
-                    form.querySelectorAll('input[type=radio]:checked').forEach((input) => ids.add(input.name));
-                    const answered = ids.size;
-                    if (answeredHint) answeredHint.textContent = `${answered} dari ${totalQuestions} soal terjawab`;
-                    if (submitBtn) submitBtn.disabled = submitting || answered < totalQuestions;
-                    return answered;
-                };
-
-                form.addEventListener('change', countAnswered);
-
-                const markCard = (card, isCorrect, chosenIndex, correctIndex, explanation) => {
-                    const options = card.querySelectorAll('.option-item');
-                    options.forEach((option, index) => {
-                        const label = option.querySelector('.option-label');
-                        option.classList.remove('border-gray-200', 'bg-white', 'hover:border-blue-300', 'hover:bg-blue-50/40');
-                        if (index === correctIndex) {
-                            option.classList.add('border-emerald-300', 'bg-emerald-50/70');
-                            label.classList.add('text-emerald-800');
-                        } else if (index === chosenIndex) {
-                            option.classList.add('border-rose-300', 'bg-rose-50/70');
-                            label.classList.add('text-rose-800');
-                        } else {
-                            option.classList.add('border-gray-100', 'bg-slate-50/50', 'opacity-70');
-                        }
-                        option.querySelector('input').disabled = true;
-                        option.classList.add('cursor-default');
-                    });
-
-                    const explanationEl = card.querySelector('.explanation');
-                    if (explanationEl) {
-                        const prefix = isCorrect
-                            ? '<span class="font-bold text-emerald-600">Benar! ✓</span>'
-                            : `<span class="font-bold text-rose-600">Belum tepat ✗</span> Jawaban benar: <span class="font-bold text-emerald-600">${chr(correctIndex)}.</span>`;
-                        explanationEl.innerHTML = `${prefix} ${escapeHtml(explanation || '')}`;
-                        explanationEl.classList.remove('hidden');
-                    }
-                };
-
-                const chr = (index) => String.fromCharCode(65 + index);
-
-                const escapeHtml = (value) => String(value)
-                    .replaceAll('&', '&amp;')
-                    .replaceAll('<', '&lt;')
-                    .replaceAll('>', '&gt;')
-                    .replaceAll('"', '&quot;')
-                    .replaceAll("'", '&#039;');
-
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    if (submitting || countAnswered() < totalQuestions) return;
-
-                    submitting = true;
-                    submitBtn.disabled = true;
-                    submitBtn.textContent = 'Memeriksa…';
-
-                    try {
-                        const fd = new FormData(form);
-                        fd.append('_token', '{{ csrf_token() }}');
-
-                        const res = await fetch('{{ route('soal.submit') }}', {
-                            method: 'POST',
-                            headers: { 'Accept': 'application/json' },
-                            body: fd,
-                        });
-                        const data = await res.json();
-
-                        if (!res.ok) throw new Error(data.message || 'Gagal memeriksa jawaban');
-
-                        data.results.forEach((result) => {
-                            const card = form.querySelector(`[data-question-id="${result.question_id}"]`);
-                            if (card) markCard(card, result.is_correct, result.chosen_index, result.correct_index, result.explanation);
-                        });
-
-                        const wrong = data.total - data.score;
-                        scoreRing.className = `w-16 h-16 rounded-2xl flex items-center justify-center text-lg font-extrabold ${wrong === 0 ? 'bg-emerald-100 text-emerald-700' : (data.score >= 7 ? 'bg-blue-100 text-blue-700' : 'bg-rose-100 text-rose-700')}`;
-                        scoreRing.textContent = `${data.score}/${data.total}`;
-                        scoreText.textContent = wrong === 0
-                            ? 'Sempurna! Semua jawabanmu benar. 🎉'
-                            : (data.score >= 7
-                                ? 'Bagus! Tinjau kembali soal yang ditandai merah ya.'
-                                : 'Ayo baca ulang Ruang Materi dan Galeri Empat Norma, lalu coba lagi.');
-                        scoreBox.classList.remove('hidden');
-                        scoreBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                    } catch (err) {
-                        scoreRing.className = 'w-16 h-16 rounded-2xl flex items-center justify-center text-lg font-extrabold bg-rose-100 text-rose-700';
-                        scoreRing.textContent = '!';
-                        scoreText.textContent = err.message || 'Terjadi kesalahan. Coba lagi.';
-                        scoreBox.classList.remove('hidden');
-                    } finally {
-                        submitting = false;
-                        submitBtn.textContent = 'Kumpulkan Jawaban';
-                        countAnswered();
-                    }
-                });
-
-                retryBtn.addEventListener('click', () => window.location.reload());
-
-                countAnswered();
+                const modal = document.getElementById('soalModal');
+                const open = () => { modal.classList.remove('hidden'); document.body.classList.add('overflow-hidden'); };
+                const close = () => { modal.classList.add('hidden'); document.body.classList.remove('overflow-hidden'); };
+                document.getElementById('openSoalModal').addEventListener('click', open);
+                document.getElementById('soalModalClose').addEventListener('click', close);
+                document.getElementById('soalModalBackdrop').addEventListener('click', close);
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
             });
         </script>
     @endpush

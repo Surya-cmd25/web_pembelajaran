@@ -100,6 +100,13 @@
                     <span>Soal Pilihan Ganda</span>
                 </a>
 
+                <a href="{{ route('admin.puzzle.index') }}" class="flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 {{ $navClass('puzzle') }}">
+                    <svg class="w-5 h-5 shrink-0 {{ $navIconClass('puzzle') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/>
+                    </svg>
+                    <span>Puzzle</span>
+                </a>
+
                 <a href="{{ route('admin.hafalan.index') }}" class="flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 {{ $navClass('hafalan') }}">
                     <svg class="w-5 h-5 shrink-0 {{ $navIconClass('hafalan') }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/>
@@ -147,10 +154,6 @@
             </div>
 
             <div class="flex items-center gap-3 sm:gap-4">
-                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                    <span class="w-2 h-2 rounded-full bg-blue-600"></span>
-                    Mode Guru
-                </span>
 
                 <!-- User Profile Pill -->
                 <div class="relative">

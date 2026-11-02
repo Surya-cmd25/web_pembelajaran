@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ExportController as AdminExportController;
 use App\Http\Controllers\Admin\MateriController as AdminMateriController;
 use App\Http\Controllers\Admin\McqController as AdminMcqController;
 use App\Http\Controllers\Admin\NormController as AdminNormController;
+use App\Http\Controllers\Admin\PuzzleLevelController as AdminPuzzleLevelController;
 use App\Http\Controllers\Admin\QuizPairController as AdminQuizPairController;
 use App\Http\Controllers\Admin\RecordingController as AdminRecordingController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
@@ -40,7 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/quiz/upaya', [QuizController::class, 'store'])->name('quiz.store');
 
     Route::get('/soal', [SoalController::class, 'index'])->name('soal');
+    Route::get('/soal/kerjakan', [SoalController::class, 'start'])->name('soal.kerjakan');
     Route::post('/soal', [SoalController::class, 'submit'])->name('soal.submit');
+    Route::get('/soal/hasil/{attempt}', [SoalController::class, 'result'])->name('soal.hasil');
 
     Route::get('/puzzle', [PuzzleController::class, 'index'])->name('puzzle');
     Route::post('/puzzle', [PuzzleController::class, 'save'])->name('puzzle.save');
@@ -58,7 +61,11 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('kartu-hafalan', AdminConceptCardController::class)->except('show');
         Route::resource('norma', AdminNormController::class)->except('show');
+        Route::resource('puzzle', AdminPuzzleLevelController::class)->except('show');
         Route::resource('pasangan-quiz', AdminQuizPairController::class)->except('show');
+        Route::get('soal-pilihan-ganda/hasil', [AdminMcqController::class, 'results'])->name('soal-pilihan-ganda.hasil');
+        Route::get('soal-pilihan-ganda/hasil/{attempt}', [AdminMcqController::class, 'showResult'])->name('soal-pilihan-ganda.hasil.show');
+        Route::put('soal-pilihan-ganda/pengaturan', [AdminMcqController::class, 'updateSettings'])->name('soal-pilihan-ganda.pengaturan');
         Route::resource('soal-pilihan-ganda', AdminMcqController::class)->except('show');
 
         Route::get('hafalan', [AdminRecordingController::class, 'index'])->name('hafalan.index');

@@ -96,7 +96,7 @@
             <label for="illustration_path" class="block text-sm font-bold text-gray-700 mb-1.5">Ilustrasi (Opsional)</label>
             <div class="flex items-center gap-4">
                 @if ($norm?->illustration_path)
-                    <img src="{{ Storage::url($norm->illustration_path) }}" alt="{{ $norm->name ?? 'Ilustrasi' }}" class="w-16 h-16 rounded-xl object-cover border border-gray-200 shrink-0">
+                    <img src="{{ asset('storage/'.$norm->illustration_path) }}" alt="{{ $norm->name ?? 'Ilustrasi' }}" class="w-16 h-16 rounded-xl object-cover border border-gray-200 shrink-0">
                 @endif
                 <input type="file" id="illustration_path" name="illustration_path" accept="image/jpeg,image/png,image/webp"
                     class="block w-full text-sm text-gray-600 file:mr-4 file:rounded-xl file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-xs file:font-bold file:text-blue-700 hover:file:bg-blue-100 file:cursor-pointer">

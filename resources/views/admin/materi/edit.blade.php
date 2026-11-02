@@ -4,7 +4,7 @@
         <p class="text-xs sm:text-sm text-gray-500 mt-1">Perbarui isi materi: <span class="font-bold text-gray-700">{{ $materi->title }}</span></p>
     </div>
 
-    <form method="POST" action="{{ route('admin.materi.update', $materi) }}">
+    <form method="POST" action="{{ route('admin.materi.update', $materi) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         @include('admin.materi.form', ['submitLabel' => 'Perbarui Materi'])

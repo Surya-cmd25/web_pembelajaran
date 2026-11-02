@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\SoalController;
+use App\Models\AppSetting;
+use App\Models\McqAttempt;
 use App\Models\McqQuestion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,7 +20,11 @@ class McqController extends Controller
     {
         $questions = McqQuestion::orderBy('sort_order')->orderBy('id')->get();
 
-        return view('admin.soal-pilihan-ganda.index', compact('questions'));
+        return view('admin.soal-pilihan-ganda.index', [
+            'questions' => $questions,
+            'durationMinutes' => SoalController::durationMinutes(),
+            'description' => AppSetting::read('mcq_description', ''),
+        ]);
     }
 
     /**
@@ -78,6 +85,54 @@ class McqController extends Controller
         return redirect()
             ->route('admin.soal-pilihan-ganda.index')
             ->with('status', 'Soal pilihan ganda berhasil dihapus.');
+    }
+
+    /**
+     * List the quiz attempts submitted by students.
+     */
+    public function results(Request $request): View
+    {
+        $q = $request->query('q');
+
+        $attempts = McqAttempt::with('user:id,name,email')
+            ->when($q, fn ($query, $term) => $query->whereHas(
+                'user',
+                fn ($user) => $user->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%")
+            ))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('admin.soal-pilihan-ganda.hasil', [
+            'attempts' => $attempts,
+            'q' => $q,
+        ]);
+    }
+
+    /**
+     * Show one attempt with the review of right and wrong answers.
+     */
+    public function showResult(McqAttempt $attempt): View
+    {
+        return view('admin.soal-pilihan-ganda.hasil-show', [
+            'attempt' => $attempt->load('user:id,name,email'),
+        ]);
+    }
+
+    /**
+     * Save the description and working time shown to students.
+     */
+    public function updateSettings(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'duration_minutes' => ['required', 'integer', 'min:1', 'max:240'],
+            'description' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        AppSetting::write('mcq_duration_minutes', (string) $validated['duration_minutes']);
+        AppSetting::write('mcq_description', $validated['description'] ?? null);
+
+        return back()->with('status', 'Pengaturan soal berhasil disimpan.');
     }
 
     /**

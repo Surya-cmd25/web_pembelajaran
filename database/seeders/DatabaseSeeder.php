@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             NormSeeder::class,
             QuizPairSeeder::class,
             McqQuestionSeeder::class,
+            PuzzleLevelSeeder::class,
         ]);
     }
 }

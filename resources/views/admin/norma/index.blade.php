@@ -50,7 +50,6 @@
                             <tr class="hover:bg-gray-50/60 transition-colors">
                                 <td class="px-5 py-4">
                                     <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-bold {{ $colorChip[$norm->color] ?? $colorChip['blue'] }}">
-                                        <span class="w-2 h-2 rounded-full {{ $colorDot[$norm->color] ?? $colorDot['blue'] }}"></span>
                                         {{ $norm->name }}
                                     </span>
                                     <p class="mt-1 text-xs text-gray-400 font-medium">{{ $norm->slug }}</p>
@@ -64,7 +63,7 @@
                                 </td>
                                 <td class="px-5 py-4">
                                     @if ($norm->illustration_path)
-                                        <img src="{{ Storage::url($norm->illustration_path) }}" alt="{{ $norm->name }}" class="w-14 h-14 rounded-xl object-cover border border-gray-200">
+                                        <img src="{{ asset('storage/'.$norm->illustration_path) }}" alt="{{ $norm->name }}" class="w-14 h-14 rounded-xl object-cover border border-gray-200">
                                     @else
                                         <span class="text-xs text-gray-400 font-medium">Tidak ada</span>
                                     @endif

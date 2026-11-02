@@ -2,9 +2,6 @@
     {{-- Page heading --}}
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-            <span class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 uppercase tracking-wider">
-                <span class="w-1.5 h-1.5 rounded-full bg-blue-600"></span> Game Interaktif
-            </span>
             <h2 class="text-2xl sm:text-[28px] font-extrabold text-gray-900 tracking-tight mt-1">Quiz Mencocokkan</h2>
             <p class="text-xs sm:text-sm text-gray-500 mt-1">
                 Cocokkan situasi sehari-hari dengan jenis norma yang sesuai. Tarik garis antarkartu atau klik kedua kartu.
@@ -260,17 +257,20 @@
                     normList.innerHTML = '';
                     norms.forEach((normKey) => {
                         const meta = NORM_META[normKey];
-                        const owner = [...connections.entries()].find(([, v]) => v === normKey);
-                        const ownerResult = owner && results ? results.get(owner[0]) : null;
+                        const owners = [...connections.entries()].filter(([, v]) => v === normKey).map(([id]) => id);
+                        const ownerResults = results ? owners.map((id) => results.get(id)).filter(Boolean) : [];
+                        const anyWrong = ownerResults.some((r) => !r.is_correct);
+                        const aggregate = ownerResults.length ? { is_correct: !anyWrong } : null;
                         const isSelected = selected?.type === 'norm' && selected.id === normKey;
-                        const state = cardState(isSelected, !!owner, ownerResult);
+                        const state = cardState(isSelected, owners.length > 0, aggregate);
 
                         let check = badge('bg-gray-100 text-gray-300', CHECK_PATH);
-                        if (ownerResult && !ownerResult.is_correct) {
+                        if (anyWrong) {
                             check = badge('bg-rose-100 text-rose-500', CROSS_PATH);
-                        } else if (owner) {
+                        } else if (owners.length) {
                             check = badge('bg-emerald-100 text-emerald-600', CHECK_PATH);
                         }
+                        const countLabel = owners.length > 1 ? `<span class="text-[11px] font-bold text-gray-500 shrink-0">${owners.length} situasi</span>` : '';
 
                         const card = document.createElement('div');
                         card.dataset.norm = normKey;
@@ -282,7 +282,7 @@
                                 <p class="text-sm font-extrabold text-gray-900">${NORM_LABELS[normKey]}</p>
                                 <p class="text-[11px] text-gray-500 leading-snug mt-0.5">${meta.desc}</p>
                             </div>
-                            ${check}`;
+                            ${countLabel}${check}`;
                         normList.appendChild(card);
                     });
                 };
@@ -304,9 +304,7 @@
                 // pairId (number|string) => normKey
                 const connect = (pairId, normKey) => {
                     if (results !== null) return;
-                    [...connections.entries()].forEach(([pid, norm]) => {
-                        if (norm === normKey || pid === pairId) connections.delete(pid);
-                    });
+                    // One norm may be matched with several situations; each situation has one norm.
                     connections.set(Number(pairId), normKey);
                     selected = null;
                     render();
@@ -329,6 +327,7 @@
                     if (type === 'situation') {
                         if (selected?.type === 'situation' && selected.id === id) return clearSelection();
                         if (connections.has(Number(id))) return disconnect(id);
+                        if (selected?.type === 'norm') return connect(Number(id), selected.id);
                         selected = { type: 'situation', id: Number(id) };
                         render();
                         return;
@@ -339,8 +338,6 @@
                     if (selected?.type === 'situation') {
                         connect(selected.id, id);
                     } else {
-                        const owner = [...connections.entries()].find(([, v]) => v === id);
-                        if (owner) return disconnect(owner[0]);
                         selected = { type: 'norm', id };
                         render();
                     }

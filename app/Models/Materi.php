@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['slug', 'title', 'summary', 'body', 'quote', 'audio_path', 'audio_duration', 'sort_order', 'is_published'])]
+#[Fillable(['slug', 'title', 'summary', 'body', 'quote', 'image_path', 'audio_path', 'audio_duration', 'sort_order', 'is_published'])]
 class Materi extends Model
 {
     /** @use HasFactory<MateriFactory> */

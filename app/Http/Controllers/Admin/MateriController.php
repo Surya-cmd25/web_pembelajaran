@@ -46,11 +46,18 @@ class MateriController extends Controller
             'summary' => ['nullable', 'string', 'max:255'],
             'body' => ['required', 'string'],
             'quote' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'sort_order' => ['required', 'integer', 'min:1'],
             'is_published' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_published'] = $request->boolean('is_published');
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('materi', 'public');
+        }
+
+        unset($validated['image']);
 
         Materi::create($validated);
 
@@ -84,11 +91,22 @@ class MateriController extends Controller
             'summary' => ['nullable', 'string', 'max:255'],
             'body' => ['required', 'string'],
             'quote' => ['nullable', 'string', 'max:255'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
             'sort_order' => ['required', 'integer', 'min:1'],
             'is_published' => ['nullable', 'boolean'],
         ]);
 
         $validated['is_published'] = $request->boolean('is_published');
+
+        if ($request->hasFile('image')) {
+            $this->deleteImage($materi);
+            $validated['image_path'] = $request->file('image')->store('materi', 'public');
+        } elseif ($request->boolean('remove_image')) {
+            $this->deleteImage($materi);
+            $validated['image_path'] = null;
+        }
+
+        unset($validated['image']);
 
         $materi->update($validated);
 
@@ -144,9 +162,20 @@ class MateriController extends Controller
             Storage::disk('public')->delete($materi->audio_path);
         }
 
+        $this->deleteImage($materi);
         $materi->delete();
 
         return redirect()->route('admin.materi.index')
             ->with('status', 'Materi berhasil dihapus.');
+    }
+
+    /**
+     * Remove the stored picture of a materi.
+     */
+    private function deleteImage(Materi $materi): void
+    {
+        if ($materi->image_path && Storage::disk('public')->exists($materi->image_path)) {
+            Storage::disk('public')->delete($materi->image_path);
+        }
     }
 }

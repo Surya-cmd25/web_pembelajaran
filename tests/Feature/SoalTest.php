@@ -17,7 +17,9 @@ class SoalTest extends TestCase
         McqQuestion::factory()->count(3)->create();
         $user = User::factory()->create();
 
-        $response = $this->actingAs($user)->get(route('soal'))->assertOk();
+        $this->actingAs($user)->get(route('soal'))->assertOk()->assertSee('3 soal');
+
+        $response = $this->actingAs($user)->get(route('soal.kerjakan'))->assertOk();
 
         $response->assertSee('data-question-id');
 
@@ -53,9 +55,11 @@ class SoalTest extends TestCase
 
         $this->assertSame(2, $response->json('score'));
         $this->assertSame(3, $response->json('total'));
-        $this->assertTrue($response->json('results.0.is_correct'));
-        $this->assertFalse($response->json('results.1.is_correct'));
-        $this->assertNotNull($response->json('results.1.explanation'));
+        $byId = collect($response->json('results'))->keyBy('question_id');
+        $this->assertTrue($byId[$questions[0]->id]['is_correct']);
+        $this->assertFalse($byId[$questions[1]->id]['is_correct']);
+        $this->assertNotNull($byId[$questions[1]->id]['explanation']);
+        $this->assertNotNull($response->json('redirect'));
 
         $this->assertDatabaseHas('mcq_attempts', [
             'user_id' => $user->id,
@@ -96,5 +100,40 @@ class SoalTest extends TestCase
         ])->assertOk();
 
         $this->assertSame(1, McqAttempt::where('user_id', $user->id)->count());
+    }
+
+    public function test_unanswered_questions_count_as_wrong_and_review_is_stored(): void
+    {
+        $questions = McqQuestion::factory()->count(3)->create(['correct_index' => 1]);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('soal.kerjakan'))->assertOk();
+
+        $response = $this->actingAs($user)->postJson(route('soal.submit'), [
+            'answers' => [$questions[0]->id => 1],
+        ])->assertOk();
+
+        $this->assertSame(1, $response->json('score'));
+        $this->assertSame(3, $response->json('total'));
+
+        $attempt = McqAttempt::where('user_id', $user->id)->firstOrFail();
+        $this->assertCount(3, $attempt->review);
+        $unanswered = collect($attempt->review)->where('question_id', $questions[1]->id)->first();
+        $this->assertNull($unanswered['chosen_index']);
+        $this->assertNotNull($attempt->duration_seconds);
+
+        $this->actingAs($user)->get(route('soal.hasil', $attempt))
+            ->assertOk()
+            ->assertSee('Pembahasan')
+            ->assertSee('Tidak dijawab');
+    }
+
+    public function test_student_cannot_open_someone_elses_result(): void
+    {
+        $attempt = McqAttempt::factory()->create();
+
+        $this->actingAs(User::factory()->create())
+            ->get(route('soal.hasil', $attempt))
+            ->assertNotFound();
     }
 }

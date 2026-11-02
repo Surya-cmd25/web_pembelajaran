@@ -32,7 +32,11 @@
                 <div class="h-36 {{ $palette['card'] }} flex flex-col items-center justify-center gap-2 border-b border-white/60 relative overflow-hidden">
                     <div class="pointer-events-none absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/50"></div>
                     <span data-illustration class="relative drop-shadow-sm">
-                        <x-norm-illustration :slug="$norm->slug" class="w-20 h-20" />
+                        @if ($norm->illustration_path)
+                            <img src="{{ asset('storage/'.$norm->illustration_path) }}" alt="{{ $norm->name }}" class="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow-sm">
+                        @else
+                            <x-norm-illustration :slug="$norm->slug" class="w-20 h-20" />
+                        @endif
                     </span>
                     <span class="relative text-[11px] font-bold uppercase tracking-wider {{ $palette['text'] }}">
                         {{ \Illuminate\Support\Str::of($norm->name)->afterLast(' ')->upper() }} Pilar Norma
@@ -54,32 +58,12 @@
                     </p>
 
                     <div class="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between text-xs">
-                        <span class="font-semibold text-gray-600">
-                            Contoh: {{ $norm->examples[0] ?? '-' }}
-                        </span>
                         <span class="font-bold text-blue-600 group-hover:text-blue-700">Detail →</span>
                     </div>
                 </div>
             </button>
         @endforeach
     </div>
-
-    {{-- Quick tips --}}
-    <section class="bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-6">
-        <div class="flex items-start gap-4">
-            <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            </div>
-            <div>
-                <h3 class="text-sm font-extrabold text-gray-900">Cara Membaca Galeri</h3>
-                <p class="text-xs text-gray-500 leading-relaxed mt-1">
-                    Setiap kartu memuat sumber norma, contoh perilaku nyata, dan sanksi bila dilanggar. Bandingkan keempatnya — satu peristiwa sering melanggar lebih dari satu norma sekaligus.
-                </p>
-            </div>
-        </div>
-    </section>
 
     {{-- Detail modal --}}
     <div id="normModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
@@ -145,7 +129,9 @@
 
                 const openModal = (norm, card) => {
                     emoji.innerHTML = card.querySelector('[data-illustration]').innerHTML;
-                    emoji.firstElementChild.setAttribute('class', 'w-28 h-28');
+                    emoji.firstElementChild.setAttribute('class', emoji.firstElementChild.tagName === 'IMG'
+                        ? 'w-28 h-28 rounded-2xl object-cover border-2 border-white shadow-sm'
+                        : 'w-28 h-28');
                     title.textContent = norm.name;
                     desc.textContent = norm.description;
                     header.className = 'p-6 pb-4 relative ' + (headerPalette[norm.color] ?? 'bg-slate-50');

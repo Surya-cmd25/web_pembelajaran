@@ -97,7 +97,6 @@
         <div id="colorPreview" class="flex items-center gap-2 text-xs font-bold text-gray-500">
             <span>Pratinjau warna:</span>
             <span class="inline-flex items-center gap-2 rounded-full border px-3 py-1 bg-blue-50 text-blue-700 border-blue-200">
-                <span id="colorDot" class="w-2 h-2 rounded-full bg-blue-500"></span>
                 <span id="colorName">blue</span>
             </span>
         </div>
@@ -117,17 +116,14 @@
 @push('scripts')
 <script>
     (function () {
-        const colorMap = @json($colorDot);
         const select = document.getElementById('color');
-        const dot = document.getElementById('colorDot');
         const name = document.getElementById('colorName');
 
         function refresh() {
             const color = select.value;
-            dot.className = 'w-2 h-2 rounded-full ' + (colorMap[color] || colorMap.blue);
             name.textContent = color;
 
-            const chip = dot.parentElement;
+            const chip = name.parentElement;
             chip.className = 'inline-flex items-center gap-2 rounded-full border px-3 py-1 bg-' + color + '-50 text-' + color + '-700 border-' + color + '-200';
         }
 

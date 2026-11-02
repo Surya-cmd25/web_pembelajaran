@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AppSetting;
 use App\Models\McqAttempt;
 use App\Models\McqQuestion;
 use App\Models\UserActivity;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -13,12 +15,31 @@ use Illuminate\View\View;
 class SoalController extends Controller
 {
     /**
-     * Show the multiple-choice quiz without revealing the answers.
+     * Default working time in minutes when the teacher has not set one.
+     */
+    public const int DEFAULT_DURATION_MINUTES = 15;
+
+    /**
+     * Show the quiz card; the details open in a popup before the student starts.
      */
     public function index(Request $request): View
     {
+        return view('soal', [
+            'questionCount' => McqQuestion::active()->count(),
+            'durationMinutes' => self::durationMinutes(),
+            'description' => AppSetting::read('mcq_description', 'Jawab soal situasi sosial seputar nilai dan norma, lalu periksa pembahasannya.'),
+            'attempts' => $request->user()->mcqAttempts()->latest('created_at')->take(5)->get(),
+        ]);
+    }
+
+    /**
+     * Show the timed exam page without revealing the answers.
+     */
+    public function start(Request $request): View|RedirectResponse
+    {
         $questions = McqQuestion::active()
             ->orderBy('sort_order')
+            ->orderBy('id')
             ->get()
             ->map(fn (McqQuestion $question) => [
                 'id' => $question->id,
@@ -26,67 +47,107 @@ class SoalController extends Controller
                 'options' => $question->options,
             ]);
 
-        return view('soal', [
+        if ($questions->isEmpty()) {
+            return redirect()->route('soal')->with('status', 'Belum ada soal tersedia.');
+        }
+
+        $request->session()->put('mcq_started_at', now()->timestamp);
+
+        return view('soal-kerjakan', [
             'questions' => $questions,
-            'latestAttempt' => $request->user()->mcqAttempts()->latest('created_at')->first(),
+            'durationMinutes' => self::durationMinutes(),
         ]);
     }
 
     /**
      * Score the submitted answers server-side and store the attempt.
+     *
+     * Unanswered questions (for example when the timer runs out) count as wrong.
      */
     public function submit(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'answers' => ['required', 'array', 'min:1'],
-            'answers.*' => ['required', 'integer', 'min:0', 'max:3'],
+            'answers' => ['nullable', 'array'],
+            'answers.*' => ['nullable', 'integer', 'min:0', 'max:3'],
         ]);
 
-        $answers = $validated['answers'];
+        $answers = collect($validated['answers'] ?? [])
+            ->filter(fn ($value) => $value !== null && $value !== '');
 
-        $questions = McqQuestion::active()->whereIn('id', array_keys($answers))->get();
+        $questions = McqQuestion::active()->orderBy('sort_order')->orderBy('id')->get();
 
-        if ($questions->count() !== count($answers)) {
+        if ($answers->keys()->diff($questions->pluck('id'))->isNotEmpty()) {
             return response()->json([
                 'message' => 'Jawaban tidak valid. Muat ulang halaman lalu coba lagi.',
             ], 422);
         }
 
-        $results = [];
+        if ($questions->isEmpty()) {
+            return response()->json(['message' => 'Belum ada soal tersedia.'], 422);
+        }
+
+        $review = [];
         $score = 0;
 
-        foreach ($answers as $questionId => $chosenIndex) {
-            $question = $questions->firstWhere('id', (int) $questionId);
-
-            $isCorrect = (int) $chosenIndex === $question->correct_index;
+        foreach ($questions as $question) {
+            $chosen = $answers->has($question->id) ? (int) $answers[$question->id] : null;
+            $isCorrect = $chosen === $question->correct_index;
             $score += $isCorrect ? 1 : 0;
 
-            $results[] = [
+            $review[] = [
                 'question_id' => $question->id,
-                'chosen_index' => (int) $chosenIndex,
+                'question' => $question->question,
+                'options' => $question->options,
+                'chosen_index' => $chosen,
                 'correct_index' => $question->correct_index,
                 'is_correct' => $isCorrect,
                 'explanation' => $question->explanation,
             ];
         }
 
-        $total = count($results);
+        $startedAt = $request->session()->pull('mcq_started_at');
+        $duration = $startedAt
+            ? min(max(now()->timestamp - (int) $startedAt, 0), 65535)
+            : null;
 
-        DB::transaction(function () use ($request, $answers, $score, $total) {
-            McqAttempt::create([
+        $attempt = DB::transaction(function () use ($request, $answers, $score, $review, $duration) {
+            $attempt = McqAttempt::create([
                 'user_id' => $request->user()->id,
                 'score' => $score,
-                'total' => $total,
-                'answers' => $answers,
+                'total' => count($review),
+                'answers' => $answers->all(),
+                'duration_seconds' => $duration,
+                'review' => $review,
             ]);
 
             UserActivity::complete($request->user()->id, 'soal');
+
+            return $attempt;
         });
 
         return response()->json([
             'score' => $score,
-            'total' => $total,
-            'results' => $results,
+            'total' => count($review),
+            'results' => $review,
+            'redirect' => route('soal.hasil', $attempt),
         ]);
+    }
+
+    /**
+     * Show the score and the review of one attempt of the signed-in student.
+     */
+    public function result(Request $request, McqAttempt $attempt): View
+    {
+        abort_unless($attempt->user_id === $request->user()->id, 404);
+
+        return view('soal-hasil', ['attempt' => $attempt]);
+    }
+
+    /**
+     * The working time of the quiz in minutes.
+     */
+    public static function durationMinutes(): int
+    {
+        return max(1, (int) AppSetting::read('mcq_duration_minutes', (string) self::DEFAULT_DURATION_MINUTES));
     }
 }

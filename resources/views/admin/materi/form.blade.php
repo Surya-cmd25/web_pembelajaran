@@ -103,6 +103,25 @@
     </div>
 
     <div>
+        <label for="image" class="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1.5">Gambar Materi (opsional)</label>
+        @if ($materi?->image_path)
+            <div class="flex items-center gap-4 mb-3">
+                <img src="{{ asset('storage/'.$materi->image_path) }}" alt="Gambar materi" class="w-32 h-20 rounded-xl object-cover border border-gray-200">
+                <label class="flex items-center gap-2 text-xs font-bold text-rose-600 cursor-pointer">
+                    <input type="checkbox" name="remove_image" value="1" class="w-4 h-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500">
+                    Hapus gambar ini
+                </label>
+            </div>
+        @endif
+        <input type="file" name="image" id="image" accept="image/png,image/jpeg,image/webp"
+            class="block w-full text-sm text-gray-500 file:mr-3 file:px-4 file:py-2 file:rounded-lg file:border-0 file:bg-blue-50 file:text-blue-700 file:text-xs file:font-bold file:cursor-pointer">
+        <p class="text-[11px] text-gray-400 mt-1.5">JPG/PNG/WEBP, maksimal 3 MB. Gambar tampil di halaman materi siswa.</p>
+        @error('image')
+            <p class="text-xs font-medium text-rose-600 mt-1.5">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <div>
         <input type="hidden" name="is_published" value="0">
         <label class="flex items-center gap-3 cursor-pointer">
             <input
@@ -121,7 +140,7 @@
     </div>
 </div>
 
-<div class="flex flex-wrap items-center gap-3">
+<div class="flex flex-wrap items-center gap-3 pt-6">
     <button type="submit" class="px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors shadow-md shadow-blue-500/20">
         {{ $submitLabel ?? 'Simpan Materi' }}
     </button>

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'score', 'total', 'answers'])]
+#[Fillable(['user_id', 'score', 'total', 'answers', 'duration_seconds', 'review'])]
 class McqAttempt extends Model
 {
     /** @use HasFactory<McqAttemptFactory> */
@@ -25,6 +25,7 @@ class McqAttempt extends Model
             'score' => 'integer',
             'total' => 'integer',
             'answers' => 'array',
+            'review' => 'array',
         ];
     }
 
