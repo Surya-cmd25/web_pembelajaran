@@ -29,16 +29,16 @@
             <button type="button" data-norm-index="{{ $index }}"
                 class="norm-card group text-left bg-white rounded-3xl border border-gray-200/80 shadow-2xs hover:shadow-md overflow-hidden transition-all duration-200 focus:outline-none focus-visible:ring-2 {{ $palette['ring'] }}">
                 {{-- Illustration area --}}
-                <div class="h-36 {{ $palette['card'] }} flex flex-col items-center justify-center gap-2 border-b border-white/60 relative overflow-hidden">
+                <div class="{{ $norm->illustration_path ? 'h-52' : 'h-44' }} shrink-0 {{ $palette['card'] }} flex flex-col items-center justify-center gap-2 border-b border-white/60 relative overflow-hidden">
                     <div class="pointer-events-none absolute -right-6 -top-6 w-24 h-24 rounded-full bg-white/50"></div>
-                    <span data-illustration class="relative drop-shadow-sm">
+                    <span data-illustration class="{{ $norm->illustration_path ? 'absolute inset-0' : 'relative drop-shadow-sm' }}">
                         @if ($norm->illustration_path)
-                            <img src="{{ asset('storage/'.$norm->illustration_path) }}" alt="{{ $norm->name }}" class="w-24 h-24 rounded-2xl object-cover border-2 border-white shadow-sm">
+                            <img src="{{ asset('storage/'.$norm->illustration_path) }}" alt="{{ $norm->name }}" class="w-full h-full object-cover">
                         @else
-                            <x-norm-illustration :slug="$norm->slug" class="w-20 h-20" />
+                            <x-norm-illustration :slug="$norm->slug" class="w-28 h-28" />
                         @endif
                     </span>
-                    <span class="relative text-[11px] font-bold uppercase tracking-wider {{ $palette['text'] }}">
+                    <span class="relative text-[11px] font-bold uppercase tracking-wider {{ $palette['text'] }} {{ $norm->illustration_path ? 'mt-auto mb-3 px-3 py-1 rounded-full bg-white/90 shadow-sm' : '' }}">
                         {{ \Illuminate\Support\Str::of($norm->name)->afterLast(' ')->upper() }} Pilar Norma
                     </span>
                 </div>
@@ -73,7 +73,7 @@
                 <button id="normModalClose" type="button" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 border border-gray-200 text-gray-500 hover:text-gray-800 hover:bg-white flex items-center justify-center transition-colors">
                     <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
-                <span id="normModalEmoji" class="block w-28 h-28"></span>
+                <span id="normModalEmoji" class="block"></span>
                 <h3 id="normModalTitle" class="text-xl font-extrabold text-gray-900 mt-3"></h3>
                 <p id="normModalDesc" class="text-sm text-gray-600 leading-relaxed mt-2"></p>
             </div>
@@ -130,8 +130,8 @@
                 const openModal = (norm, card) => {
                     emoji.innerHTML = card.querySelector('[data-illustration]').innerHTML;
                     emoji.firstElementChild.setAttribute('class', emoji.firstElementChild.tagName === 'IMG'
-                        ? 'w-28 h-28 rounded-2xl object-cover border-2 border-white shadow-sm'
-                        : 'w-28 h-28');
+                        ? 'w-full h-64 sm:h-72 rounded-2xl object-cover border-2 border-white shadow-sm'
+                        : 'w-40 h-40 mx-auto');
                     title.textContent = norm.name;
                     desc.textContent = norm.description;
                     header.className = 'p-6 pb-4 relative ' + (headerPalette[norm.color] ?? 'bg-slate-50');
