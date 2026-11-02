@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="1000" height="600" role="img" aria-label="Potret Émile Durkheim">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#DBEAFE"/>
+      <stop offset="0.55" stop-color="#EFF6FF"/>
+      <stop offset="1" stop-color="#F8FAFC"/>
+    </linearGradient>
+    <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1E3A8A"/>
+      <stop offset="1" stop-color="#0F172A"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F6D5B8"/>
+      <stop offset="1" stop-color="#EFC39E"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.55">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1000" height="600" fill="url(#bg)"/>
+  <circle cx="500" cy="250" r="260" fill="url(#halo)"/>
+
+  <!-- Decorative geometry -->
+  <circle cx="120" cy="110" r="64" fill="#93C5FD" opacity="0.35"/>
+  <circle cx="890" cy="470" r="86" fill="#2563EB" opacity="0.14"/>
+  <rect x="820" y="70" width="90" height="90" rx="22" fill="#FDE68A" opacity="0.55" transform="rotate(18 865 115)"/>
+  <rect x="70" y="430" width="120" height="120" rx="28" fill="#BFDBFE" opacity="0.7"/>
+  <path d="M60 300 h140" stroke="#2563EB" stroke-width="6" stroke-linecap="round" opacity="0.35"/>
+  <path d="M810 260 h130" stroke="#1D4ED8" stroke-width="6" stroke-linecap="round" opacity="0.3"/>
+
+  <!-- Shoulders / suit -->
+  <path d="M250 600 C 270 470, 360 415, 500 415 C 640 415, 730 470, 750 600 Z" fill="url(#suit)"/>
+  <!-- Shirt -->
+  <path d="M445 430 L500 500 L555 430 L540 600 L460 600 Z" fill="#F1F5F9"/>
+  <!-- Tie -->
+  <path d="M500 470 L522 505 L500 600 L478 505 Z" fill="#2563EB"/>
+  <path d="M500 470 L512 452 L500 438 L488 452 Z" fill="#1D4ED8"/>
+  <!-- Lapels -->
+  <path d="M445 430 L460 600 L370 600 C 380 505, 405 452, 445 430 Z" fill="#172554"/>
+  <path d="M555 430 L540 600 L630 600 C 620 505, 595 452, 555 430 Z" fill="#172554"/>
+
+  <!-- Neck -->
+  <path d="M462 370 h76 v70 c0 24 -76 24 -76 0 Z" fill="#EFC39E"/>
+
+  <!-- Head -->
+  <ellipse cx="500" cy="262" rx="118" ry="138" fill="url(#skin)"/>
+
+  <!-- Ears -->
+  <ellipse cx="384" cy="272" rx="20" ry="32" fill="#EFC39E"/>
+  <ellipse cx="616" cy="272" rx="20" ry="32" fill="#EFC39E"/>
+
+  <!-- Hair (balding top, sides) -->
+  <path d="M386 226 C 384 130, 430 96, 500 96 C 570 96, 616 130, 614 226 C 604 176, 574 156, 540 168 C 520 146, 480 146, 460 168 C 426 156, 396 176, 386 226 Z" fill="#6B7280"/>
+  <path d="M386 226 C 380 250, 384 274, 392 292 C 388 254, 392 236, 400 220 Z" fill="#6B7280"/>
+  <path d="M614 226 C 620 250, 616 274, 608 292 C 612 254, 608 236, 600 220 Z" fill="#6B7280"/>
+
+  <!-- Eyebrows -->
+  <path d="M424 244 q 30 -18 62 -6" stroke="#4B5563" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <path d="M576 244 q -30 -18 -62 -6" stroke="#4B5563" stroke-width="11" stroke-linecap="round" fill="none"/>
+
+  <!-- Eyes -->
+  <ellipse cx="454" cy="278" rx="26" ry="17" fill="#FFFFFF"/>
+  <ellipse cx="546" cy="278" rx="26" ry="17" fill="#FFFFFF"/>
+  <circle cx="456" cy="279" r="10" fill="#334155"/>
+  <circle cx="544" cy="279" r="10" fill="#334155"/>
+  <circle cx="459" cy="276" r="3.5" fill="#FFFFFF"/>
+  <circle cx="547" cy="276" r="3.5" fill="#FFFFFF"/>
+
+  <!-- Nose -->
+  <path d="M500 288 q -14 44 -22 58 q 14 14 44 0 q -8 -16 -22 -58" fill="#E8B48C"/>
+
+  <!-- Mustache -->
+  <path d="M436 356 C 460 338, 540 338, 564 356 C 546 376, 454 376, 436 356 Z" fill="#6B7280"/>
+
+  <!-- Beard -->
+  <path d="M404 320 C 404 420, 448 470, 500 470 C 552 470, 596 420, 596 320 C 590 386, 566 424, 540 436 C 524 418, 476 418, 460 436 C 434 424, 410 386, 404 320 Z" fill="#6B7280"/>
+  <path d="M436 356 C 454 380, 546 380, 564 356 C 560 400, 540 432, 500 436 C 460 432, 440 400, 436 356 Z" fill="#9CA3AF" opacity="0.55"/>
+
+  <!-- Glasses (pince-nez style) -->
+  <circle cx="454" cy="278" r="36" fill="none" stroke="#0F172A" stroke-width="7"/>
+  <circle cx="546" cy="278" r="36" fill="none" stroke="#0F172A" stroke-width="7"/>
+  <path d="M490 276 q 10 -12 20 0" stroke="#0F172A" stroke-width="7" fill="none" stroke-linecap="round"/>
+  <path d="M418 272 L 392 262" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
+  <path d="M582 272 L 608 262" stroke="#0F172A" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- Caption band -->
+  <rect x="0" y="536" width="1000" height="64" fill="#0F172A" opacity="0.88"/>
+  <text x="500" y="566" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="26" font-style="italic" fill="#F8FAFC">Émile Durkheim</text>
+  <text x="500" y="590" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" letter-spacing="3" fill="#93C5FD">BAPAK SOSIOLOGI MODERN</text>
+</svg>

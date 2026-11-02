@@ -1,0 +1,162 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Plus Jakarta Sans', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --color-sov-blue: #2563eb;
+    --color-sov-blue-dark: #1d4ed8;
+    --color-sov-navy: #0f172a;
+    --color-sov-bg: #f8fafc;
+}
+
+/* Custom 3D flip card utilities */
+.perspective-1000 {
+    perspective: 1000px;
+}
+
+.transform-style-3d {
+    transform-style: preserve-3d;
+}
+
+.backface-hidden {
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+    transform: rotateY(180deg);
+}
+
+/* Smooth waveform animation */
+@keyframes waveBounce {
+    0%, 100% {
+        transform: scaleY(0.25);
+    }
+    50% {
+        transform: scaleY(1);
+    }
+}
+
+.animate-wave-bar {
+    transform-origin: bottom;
+    animation: waveBounce 1.2s ease-in-out infinite;
+}
+
+/* Underline brush decoration */
+.brush-underline {
+    position: relative;
+    white-space: nowrap;
+}
+
+.brush-underline::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: currentColor;
+    opacity: 0.85;
+    border-radius: 9999px;
+    transform: rotate(-0.5deg);
+}
+
+/* Disable native browser password reveal & clear buttons (e.g. Microsoft Edge) */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+
+/* Page & first-entry animations (dashboard + admin layouts) */
+@view-transition {
+    navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 0.25s;
+}
+
+.app-sidebar {
+    view-transition-name: app-sidebar;
+}
+
+.app-header {
+    view-transition-name: app-header;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-12px); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes slideRight {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: none; }
+}
+
+.page-enter > * {
+    animation: fadeUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.page-enter > *:nth-child(1) { animation-delay: 40ms; }
+.page-enter > *:nth-child(2) { animation-delay: 110ms; }
+.page-enter > *:nth-child(3) { animation-delay: 180ms; }
+.page-enter > *:nth-child(4) { animation-delay: 250ms; }
+.page-enter > *:nth-child(5) { animation-delay: 320ms; }
+.page-enter > *:nth-child(n + 6) { animation-delay: 390ms; }
+
+.title-enter {
+    animation: fadeIn 0.4s ease-out backwards;
+}
+
+.intro .app-header {
+    animation: fadeDown 0.6s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.intro .sidebar-brand {
+    animation: fadeIn 0.6s ease-out backwards;
+}
+
+.intro .app-nav > * {
+    animation: slideRight 0.55s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.intro .app-nav > *:nth-child(1) { animation-delay: 120ms; }
+.intro .app-nav > *:nth-child(2) { animation-delay: 180ms; }
+.intro .app-nav > *:nth-child(3) { animation-delay: 240ms; }
+.intro .app-nav > *:nth-child(4) { animation-delay: 300ms; }
+.intro .app-nav > *:nth-child(5) { animation-delay: 360ms; }
+.intro .app-nav > *:nth-child(6) { animation-delay: 420ms; }
+.intro .app-nav > *:nth-child(7) { animation-delay: 480ms; }
+.intro .app-nav > *:nth-child(n + 8) { animation-delay: 540ms; }
+
+@media (prefers-reduced-motion: reduce) {
+    .page-enter > *,
+    .title-enter,
+    .intro .app-header,
+    .intro .sidebar-brand,
+    .intro .app-nav > * {
+        animation: none;
+    }
+
+    @view-transition {
+        navigation: none;
+    }
+}
