@@ -19,6 +19,7 @@ class McqQuestionFactory extends Factory
     {
         return [
             'question' => ucfirst(fake()->sentence(18)).'?',
+            'difficulty' => McqQuestion::DEFAULT_DIFFICULTY,
             'options' => fake()->sentences(4),
             'correct_index' => 0,
             'explanation' => fake()->sentence(14),
@@ -34,6 +35,16 @@ class McqQuestionFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    /**
+     * Set the difficulty level of the generated question.
+     */
+    public function difficulty(string $level): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'difficulty' => $level,
         ]);
     }
 }

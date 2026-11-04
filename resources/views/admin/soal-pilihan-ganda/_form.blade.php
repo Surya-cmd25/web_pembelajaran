@@ -28,6 +28,27 @@
             @enderror
         </div>
 
+        <!-- Level Kesulitan -->
+        <div>
+            <span class="block text-sm font-bold text-gray-700 mb-2">Level Kesulitan</span>
+            <div class="flex flex-wrap gap-3">
+                @foreach ($levels as $value => $label)
+                    <label class="cursor-pointer">
+                        <input type="radio" name="difficulty" value="{{ $value }}" required
+                            @checked(old('difficulty', $question->difficulty ?? $defaultDifficulty) === $value)
+                            class="peer sr-only">
+                        <span class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-600 transition-all peer-checked:border-blue-600 peer-checked:bg-blue-50 peer-checked:text-blue-700 peer-checked:ring-2 peer-checked:ring-blue-200">
+                            {{ $label }}
+                        </span>
+                    </label>
+                @endforeach
+            </div>
+            <p class="mt-2 text-xs text-gray-400">Soal dikelompokkan ke dalam kartu level yang dipilih siswa saat mengerjakan.</p>
+            @error('difficulty')
+                <p class="mt-1.5 text-xs font-semibold text-rose-600">{{ $message }}</p>
+            @enderror
+        </div>
+
         <!-- Pilihan Jawaban -->
         <div>
             <span class="block text-sm font-bold text-gray-700 mb-2">Pilihan Jawaban <span class="text-gray-400 font-medium">(pilih radio pada jawaban yang benar)</span></span>

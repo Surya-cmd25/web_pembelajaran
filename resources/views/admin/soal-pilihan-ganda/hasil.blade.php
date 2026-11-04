@@ -23,6 +23,7 @@
                             <th class="px-5 py-3.5 text-center">Benar</th>
                             <th class="px-5 py-3.5 text-center">Salah</th>
                             <th class="px-5 py-3.5 text-center">Nilai</th>
+                            <th class="px-5 py-3.5">Level</th>
                             <th class="px-5 py-3.5">Durasi</th>
                             <th class="px-5 py-3.5">Dikumpulkan</th>
                             <th class="px-5 py-3.5 text-right">Aksi</th>
@@ -42,6 +43,9 @@
                                 <td class="px-5 py-4 text-center font-bold text-emerald-700">{{ $attempt->score }}</td>
                                 <td class="px-5 py-4 text-center font-bold text-rose-600">{{ $attempt->total - $attempt->score }}</td>
                                 <td class="px-5 py-4 text-center"><span class="inline-flex items-center justify-center min-w-10 h-8 px-2 rounded-lg {{ $tone }} text-xs font-extrabold">{{ $pct }}</span></td>
+                                <td class="px-5 py-4">
+                                    <x-difficulty-badge :level="$attempt->difficulty" />
+                                </td>
                                 <td class="px-5 py-4 text-gray-600">
                                     {{ $attempt->duration_seconds !== null ? sprintf('%d:%02d', intdiv($attempt->duration_seconds, 60), $attempt->duration_seconds % 60) : '—' }}
                                 </td>
@@ -56,7 +60,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-5 py-12 text-center text-gray-400 font-medium">Belum ada siswa yang mengumpulkan jawaban.</td>
+                                <td colspan="8" class="px-5 py-12 text-center text-gray-400 font-medium">Belum ada siswa yang mengumpulkan jawaban.</td>
                             </tr>
                         @endforelse
                     </tbody>

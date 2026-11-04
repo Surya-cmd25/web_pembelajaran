@@ -9,7 +9,7 @@
             'galeri' => ['url' => route('galeri-norma'), 'label' => 'Galeri 4 Norma →'],
             'quiz' => ['url' => route('quiz'), 'label' => 'Quiz Mencocokkan →'],
             'soal' => ['url' => route('soal'), 'label' => 'Soal Pilihan Ganda →'],
-            'puzzle' => ['url' => route('puzzle'), 'label' => 'Puzzle Durkheim →'],
+            'puzzle' => ['url' => route('puzzle'), 'label' => 'Puzzle →'],
         ];
 
         $hafalanBadge = $pendingRecordings > 0
@@ -281,8 +281,8 @@
                 </div>
             </div>
 
-            <!-- 6. Puzzle Durkheim -->
-            <div id="puzzle-durkheim" class="bg-white rounded-2xl border border-gray-200/80 shadow-2xs hover:shadow-md p-5 flex flex-col justify-between transition-all duration-200 group">
+            <!-- 6. Puzzle -->
+            <div id="puzzle" class="bg-white rounded-2xl border border-gray-200/80 shadow-2xs hover:shadow-md p-5 flex flex-col justify-between transition-all duration-200 group">
                 <div>
                     <div class="flex items-start justify-between gap-2">
                         <!-- Rose Puzzle Piece Icon -->
@@ -303,10 +303,10 @@
                     </div>
 
                     <h3 class="text-base font-extrabold text-gray-900 mt-4 group-hover:text-rose-600 transition-colors">
-                        Puzzle Durkheim
+                        Puzzle
                     </h3>
                     <p class="text-xs text-gray-500 leading-relaxed mt-1">
-                        Susun 10 keping puzzle untuk mengungkap tokoh sosiologi Émile Durkheim.
+                        Susun 10 keping puzzle untuk mengungkap tokoh sosiologi nilai dan norma.
                     </p>
                 </div>
 

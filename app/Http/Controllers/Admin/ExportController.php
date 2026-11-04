@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\McqAttempt;
+use App\Models\McqQuestion;
 use App\Models\QuizAttempt;
 use Illuminate\Database\Eloquent\Builder;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -23,7 +24,7 @@ class ExportController extends Controller
      */
     public function soal(): StreamedResponse
     {
-        return $this->streamCsv('nilai-soal-pilihan-ganda', McqAttempt::query());
+        return $this->streamCsv('nilai-soal-pilihan-ganda', McqAttempt::query(), withLevel: true);
     }
 
     /**
@@ -31,25 +32,36 @@ class ExportController extends Controller
      *
      * @param  Builder<QuizAttempt|McqAttempt>  $query
      */
-    private function streamCsv(string $name, Builder $query): StreamedResponse
+    private function streamCsv(string $name, Builder $query, bool $withLevel = false): StreamedResponse
     {
         $filename = $name.'-'.now()->format('Ymd-His').'.csv';
 
-        return response()->streamDownload(function () use ($query) {
+        return response()->streamDownload(function () use ($query, $withLevel) {
             $out = fopen('php://output', 'w');
             fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Nama', 'Email', 'Skor', 'Total', 'Nilai (%)', 'Waktu']);
+            fputcsv($out, $withLevel
+                ? ['Nama', 'Email', 'Skor', 'Total', 'Level', 'Nilai (%)', 'Waktu']
+                : ['Nama', 'Email', 'Skor', 'Total', 'Nilai (%)', 'Waktu']);
 
-            $query->with('user:id,name,email')->latest()->chunk(200, function ($attempts) use ($out) {
+            $query->with('user:id,name,email')->latest()->chunk(200, function ($attempts) use ($out, $withLevel) {
                 foreach ($attempts as $attempt) {
-                    fputcsv($out, [
+                    $row = [
                         $this->sanitize($attempt->user->name),
                         $this->sanitize($attempt->user->email),
                         $attempt->score,
                         $attempt->total,
-                        $attempt->total > 0 ? round($attempt->score / $attempt->total * 100) : 0,
-                        $attempt->created_at->format('Y-m-d H:i'),
-                    ]);
+                    ];
+
+                    if ($withLevel) {
+                        $row[] = $attempt->difficulty !== null
+                            ? (McqQuestion::DIFFICULTIES[$attempt->difficulty] ?? $attempt->difficulty)
+                            : 'Semua level';
+                    }
+
+                    $row[] = $attempt->total > 0 ? round($attempt->score / $attempt->total * 100) : 0;
+                    $row[] = $attempt->created_at->format('Y-m-d H:i');
+
+                    fputcsv($out, $row);
                 }
             });
 

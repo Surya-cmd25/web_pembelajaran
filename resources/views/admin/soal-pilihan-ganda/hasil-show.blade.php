@@ -16,7 +16,10 @@
                     <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Nilai</span>
                 </div>
                 <div>
-                    <h3 class="text-base font-extrabold text-gray-900">{{ $attempt->user->name ?? 'Siswa dihapus' }}</h3>
+                    <div class="flex items-center gap-2">
+                        <h3 class="text-base font-extrabold text-gray-900">{{ $attempt->user->name ?? 'Siswa dihapus' }}</h3>
+                        <x-difficulty-badge :level="$attempt->difficulty" />
+                    </div>
                     <p class="text-xs text-gray-500 mt-0.5">{{ $attempt->user->email ?? '' }}</p>
                     <p class="text-xs text-gray-500 mt-1">
                         <span class="font-bold text-emerald-700">{{ $attempt->score }} benar</span> ·

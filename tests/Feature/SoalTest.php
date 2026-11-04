@@ -36,6 +36,101 @@ class SoalTest extends TestCase
         }
     }
 
+    public function test_index_shows_a_card_for_each_difficulty_level(): void
+    {
+        McqQuestion::factory()->count(2)->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->get(route('soal'))
+            ->assertOk()
+            ->assertSee('Soal Mudah')
+            ->assertSee('Soal Sedang')
+            ->assertSee('Soal Sulit');
+    }
+
+    public function test_student_starts_exam_on_the_selected_difficulty_level(): void
+    {
+        McqQuestion::factory()->difficulty('mudah')->count(2)->create();
+        McqQuestion::factory()->difficulty('sulit')->create();
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->get(route('soal.kerjakan', ['level' => 'mudah']))->assertOk();
+
+        $this->assertCount(2, $response->viewData('questions'));
+        $this->assertSame('mudah', $response->viewData('level'));
+        $response->assertSee('Mudah');
+
+        foreach ($response->viewData('questions') as $question) {
+            $this->assertArrayNotHasKey('correct_index', $question);
+        }
+    }
+
+    public function test_start_rejects_unknown_difficulty_level(): void
+    {
+        McqQuestion::factory()->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('soal.kerjakan', ['level' => 'jago']))
+            ->assertRedirect(route('soal'))
+            ->assertSessionHas('status');
+    }
+
+    public function test_start_redirects_when_the_level_has_no_questions(): void
+    {
+        McqQuestion::factory()->difficulty('mudah')->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get(route('soal.kerjakan', ['level' => 'sulit']))
+            ->assertRedirect(route('soal'))
+            ->assertSessionHas('status', 'Belum ada soal pada level ini.');
+    }
+
+    public function test_submit_scores_only_questions_from_the_selected_level(): void
+    {
+        $mudah = McqQuestion::factory()->difficulty('mudah')->count(2)->create(['correct_index' => 0]);
+        McqQuestion::factory()->difficulty('sulit')->create(['correct_index' => 0]);
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->postJson(route('soal.submit'), [
+            'level' => 'mudah',
+            'answers' => [$mudah[0]->id => 0, $mudah[1]->id => 0],
+        ])->assertOk();
+
+        $this->assertSame(2, $response->json('score'));
+        $this->assertSame(2, $response->json('total'));
+        $this->assertDatabaseHas('mcq_attempts', [
+            'user_id' => $user->id,
+            'score' => 2,
+            'total' => 2,
+            'difficulty' => 'mudah',
+        ]);
+    }
+
+    public function test_submit_rejects_answers_belonging_to_another_level(): void
+    {
+        $mudah = McqQuestion::factory()->difficulty('mudah')->create(['correct_index' => 0]);
+        $sulit = McqQuestion::factory()->difficulty('sulit')->create(['correct_index' => 0]);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->postJson(route('soal.submit'), [
+            'level' => 'mudah',
+            'answers' => [$mudah->id => 0, $sulit->id => 0],
+        ])->assertStatus(422);
+    }
+
+    public function test_submit_rejects_unknown_difficulty_level(): void
+    {
+        McqQuestion::factory()->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->postJson(route('soal.submit'), [
+            'level' => 'jago',
+            'answers' => [],
+        ])->assertUnprocessable();
+    }
+
     public function test_submit_scores_answers_server_side(): void
     {
         $questions = McqQuestion::factory()->count(3)->create([

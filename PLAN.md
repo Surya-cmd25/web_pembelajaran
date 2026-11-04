@@ -9,17 +9,22 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 
 ## ✅ Sudah Selesai
 
-### 1. Database & Data (12 migrations)
+### 1. Database & Data (21 migration — 18 aplikasi + 3 bawaan framework)
 - [x] `add_role_to_users_table` — `guru` / `siswa`
-- [x] `materis` + `materi_reads` (progress baca)
+- [x] `materis` + `materi_reads` (progress baca) + `add_image_to_materis` (gambar materi)
 - [x] `concept_cards` (8 kartu materi interaktif)
 - [x] `recordings` (audio hafalan siswa, terlihat oleh guru)
 - [x] `norms` (4 norma: kesopanan, kesusilaan, kesantunan, ketertiban)
 - [x] `quiz_pairs` + `quiz_attempts` (quiz mencocokkan kata ↔ pengertian)
-- [x] `mcq_questions` + `mcq_attempts` (10 soal pilihan ganda)
-- [x] `puzzle_progress` (progres puzzle Durkheim)
+- [x] `mcq_questions` + `mcq_attempts` — soal pilihan ganda, keduanya punya kolom `difficulty`
+  (`mudah` / `sedang` / `sulit`) untuk kartu level & hasil pengerjaan
+- [x] `add_duration_review_to_mcq_attempts` — durasi pengerjaan + review jawaban
+- [x] `puzzle_levels` + `puzzle_progress` — level puzzle (baris × kolom × waktu) & progres siswa
+- [x] `app_settings` — durasi & keterangan soal yang diatur guru
 - [x] `user_activities` (riwayat aktivitas)
-- [x] Seeder lengkap: 5 materi, 8 concept card, 4 norma, 12 quiz pair, 10 MCQ, 2 akun
+- [x] Seeder: `AdminUserSeeder`, `MateriSeeder`, `ConceptCardSeeder`, `NormSeeder`,
+  `QuizPairSeeder`, `McqQuestionSeeder` (10 soal: 4 mudah / 3 sedang / 3 sulit),
+  `PuzzleLevelSeeder` (5 level)
 
 ### 2. Autentikasi & Hak Akses
 - [x] Login hanya **email + password** (field NISN dihapus)
@@ -35,8 +40,8 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 - [x] **Setor Hafalan** — 8 kartu flip (depan: istilah / belakang: penjelasan), rekam audio per kartu (MediaRecorder), kirim ke guru
 - [x] **Galeri Empat Norma** — 4 kartu norma, popup/detail modal, ilustrasi SVG
 - [x] **Quiz Mencocokkan** — 3 pasangan per ronde, klik kiri–kanan untuk menggambar garis SVG, feedback hijau/merah, tombol "Acak Contoh Baru", skor server-side
-- [x] **Soal Pilihan Ganda** — 10 soal, navigasi antar soal, skor akhir server-side (jawaban benar tidak pernah dikirim ke client sebelum submit)
-- [x] **Puzzle Durkheim** — potret Émile Durkheim terpotong 10 keping (5×2), drag & drop, 3 level kesulitan, setelah selesai tampilkan potret utuh + penjelasan
+- [x] **Soal Pilihan Ganda** — 10 soal dibagi ke **3 kartu level kesulitan (Mudah / Sedang / Sulit)**; siswa memilih kartu lalu mengerjakan hanya soal level tersebut, navigasi antar soal, timer, skor akhir server-side (jawaban benar tidak pernah dikirim ke client sebelum submit), level dicatat di hasil & riwayat
+- [x] **Puzzle** — potret (default Émile Durkheim) terpotong 10 keping, drag & drop, s/d 5 level kesulitan, setelah selesai tampilkan gambar utuh + penjelasan
 
 ### 4. Panel Admin (Guru)
 - [x] Dashboard — ringkasan statistik & aktivitas terbaru
@@ -44,7 +49,8 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 - [x] Kelola Concept Card — 8 kartu flip untuk tiap materi
 - [x] Kelola Empat Norma — CRUD norma + ilustrasi
 - [x] Kelola Quiz Pair — bank pasangan kata–pengertian
-- [x] Kelola Soal Pilihan Ganda — CRUD 10 soal + pilihan + kunci
+- [x] Kelola Soal Pilihan Ganda — CRUD soal + pilihan + kunci + **level kesulitan**, filter tab per level, pengaturan durasi & keterangan soal, hasil/ekspor CSV per level
+- [x] Kelola Puzzle — s/d 5 level, upload gambar, atur baris × kolom & batas waktu
 - [x] Setor Hafalan — dengar rekaman audio siswa (`audio/hafalan`)
 - [x] Kelola User — lihat & atur siswa/guru
 
@@ -52,10 +58,12 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 - [x] Rebrand total dari oranye *Socius* → biru *SovNorm* (semua halaman termasuk guest & auth)
 - [x] Token `--color-socius-*` dihapus dari CSS, diganti token biru
 - [x] Layout bersama: `x:dashboard-layout`, `x:admin-layout`, `x:guest-layout`
-- [x] `public/images/durkheim.svg` untuk puzzle
+- [x] Component `x:difficulty-badge` — badge level kesulitan (Mudah/Sedang/Sulit) dipakai di daftar soal, pengerjaan, riwayat & hasil
+- [x] `public/images/durkheim.svg` untuk puzzle (gambar bawaan, bisa diganti guru)
 
 ### 6. Verifikasi
-- [x] **44 test passing** (`AuthFlowTest`, `QuizTest`, `SoalTest`, `StudentFeaturesTest`, `StudentPagesTest`, `AdminPanelTest`)
+- [x] **70 test passing** (`AuthFlowTest`, `QuizTest`, `SoalTest`, `StudentFeaturesTest`,
+  `StudentPagesTest`, `AdminPanelTest`, `AdminExtrasTest`, `OptionalFeaturesTest`)
 - [x] `php artisan view:cache` OK
 - [x] `npm run build` OK
 - [x] Laravel Pint bersih
@@ -78,7 +86,7 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 | Beranda.png | Galeri Empat Norma (Biru).png |
 | Ruang Materi.png | Quiz Mencocokkan (Biru).png |
 | Ruang Materi (detail materi).png | Soal Pilihan Ganda (Biru).png |
-| Setor Hafalan.png | Puzzle Durkheim (Biru).png |
+| Setor Hafalan.png | Puzzle (Biru).png |
 | | Admin Dashboard (Biru).png |
 | | Admin Kelola Materi (Biru).png |
 | | Admin Setor Hafalan (Biru).png |
@@ -97,13 +105,14 @@ Interaksi murni-JS belum diverifikasi secara visual (otomasi test tidak mencakup
 - [ ] Kartu flip Setor Hafalan
 - [ ] Rekam & unggah audio (butuh `npm run dev` + browser)
 - [ ] Puzzle: drag & drop kebingkai + deteksi selesai
+- [ ] Soal: 3 kartu level kesulitan + popup pengerjaan per level
 
 Cara: jalankan `npm run dev` lalu buka `http://localhost:8000`.
 
 ### 4. Opsional / Nice-to-have
 - [ ] Ilustrasi SVG untuk tiap norma (sekarang hanya placeholder warna)
 - [ ] Notifikasi email ke guru saat siswa menyetor hafalan
-- [ ] Export nilai quiz & soal ke CSV/PDF
+- [ ] Export nilai quiz & soal ke PDF (CSV untuk quiz & soal sudah ada di admin)
 - [ ] Halaman profil siswa (ganti nama, password)
 
 ---
@@ -111,16 +120,16 @@ Cara: jalankan `npm run dev` lalu buka `http://localhost:8000`.
 ## Perintah Verifikasi Cepat
 
 ```bash
-php artisan test --compact      # 44 test
-php artisan view:cache          # validasi Blade
-npm run build                   # build Vite
-vendor/bin/pint --format agent  # format PHP (repo bukan git, jalankan eksplisit)
+php artisan test --compact               # 70 test
+php artisan view:cache                   # validasi Blade
+npm run build                            # build Vite
+vendor/bin/pint --dirty --format agent   # format PHP yang berubah
 php artisan migrate:fresh --seed # reset database + data contoh
 ```
 
 ## Struktur Route Penting
 
-Lihat `routes/web.php` (62 route). Kelompok utama:
+Lihat `routes/web.php` (78 route). Kelompok utama:
 - Guest: `/`, `/beranda`, `/materi`, `/galeri-norma`, `/quiz`, `/soal`, `/puzzle`
 - Auth: `/login`, `/register`
 - Admin (prefix `admin`, middleware `role:guru`): dashboard, materi, concept-cards,

@@ -2,7 +2,10 @@
     <div class="sticky top-0 z-30 -mx-1 px-1 pt-1 pb-2">
         <div class="bg-white/95 backdrop-blur rounded-2xl border border-gray-200/80 shadow-sm px-4 py-3 flex items-center justify-between gap-3">
             <div>
-                <p class="text-sm font-extrabold text-gray-900">Soal Pilihan Ganda</p>
+                <div class="flex items-center gap-2">
+                    <p class="text-sm font-extrabold text-gray-900">Soal Pilihan Ganda</p>
+                    <x-difficulty-badge :level="$level" />
+                </div>
                 <p id="answeredHint" class="text-[11px] font-semibold text-gray-400">0 dari {{ $questions->count() }} soal terjawab</p>
             </div>
             <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 text-white">
@@ -13,6 +16,10 @@
     </div>
 
     <form id="soalForm" class="space-y-5">
+        @if ($level)
+            <input type="hidden" name="level" value="{{ $level }}">
+        @endif
+
         @foreach ($questions as $index => $item)
             <fieldset data-question-id="{{ $item['id'] }}" class="question-card bg-white rounded-3xl border border-gray-200/80 shadow-2xs p-5 sm:p-6">
                 <legend class="sr-only">Soal {{ $index + 1 }}</legend>

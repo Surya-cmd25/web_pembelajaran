@@ -40,6 +40,22 @@
             <button type="submit" class="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm transition-colors">Simpan</button>
         </form>
 
+        <!-- Filter kartu soal per level kesulitan -->
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('admin.soal-pilihan-ganda.index') }}"
+                class="inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-bold transition-all {{ $activeLevel === null ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600' }}">
+                Semua
+                <span class="{{ $activeLevel === null ? 'text-blue-100' : 'text-gray-400' }}">({{ $totalQuestions }})</span>
+            </a>
+            @foreach ($levels as $value => $label)
+                <a href="{{ route('admin.soal-pilihan-ganda.index', ['level' => $value]) }}"
+                    class="inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-xs font-bold transition-all {{ $activeLevel === $value ? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-500/20' : 'border-gray-200 bg-white text-gray-600 hover:border-blue-300 hover:text-blue-600' }}">
+                    {{ $label }}
+                    <span class="{{ $activeLevel === $value ? 'text-blue-100' : 'text-gray-400' }}">({{ (int) ($counts[$value] ?? 0) }})</span>
+                </a>
+            @endforeach
+        </div>
+
         <!-- Questions Table -->
         <div class="bg-white rounded-2xl border border-gray-200/80 shadow-2xs overflow-hidden">
             <div class="overflow-x-auto">
@@ -48,6 +64,7 @@
                         <tr class="bg-gray-50/80 border-b border-gray-200/80 text-left text-xs font-bold text-gray-500 uppercase tracking-wide">
                             <th class="px-5 py-3.5 text-center">Urutan</th>
                             <th class="px-5 py-3.5">Soal</th>
+                            <th class="px-5 py-3.5">Kesulitan</th>
                             <th class="px-5 py-3.5">Jawaban Benar</th>
                             <th class="px-5 py-3.5 text-center">Status</th>
                             <th class="px-5 py-3.5 text-right">Aksi</th>
@@ -61,6 +78,9 @@
                                 </td>
                                 <td class="px-5 py-4 text-gray-800 font-medium max-w-[340px]">
                                     <p class="truncate" title="{{ $question->question }}">{{ $question->question }}</p>
+                                </td>
+                                <td class="px-5 py-4">
+                                    <x-difficulty-badge :level="$question->difficulty" />
                                 </td>
                                 <td class="px-5 py-4 text-gray-600 max-w-[220px]">
                                     <p class="truncate font-semibold text-emerald-700" title="{{ $question->options[$question->correct_index] ?? '' }}">
@@ -93,7 +113,13 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-12 text-center text-gray-400 font-medium">Belum ada soal. Klik "Tambah Soal" untuk membuat yang pertama.</td>
+                                <td colspan="6" class="px-5 py-12 text-center text-gray-400 font-medium">
+                                    @if ($activeLevel !== null)
+                                        Belum ada soal level {{ $levels[$activeLevel] }}. Klik "Tambah Soal" untuk menambahkannya.
+                                    @else
+                                        Belum ada soal. Klik "Tambah Soal" untuk membuat yang pertama.
+                                    @endif
+                                </td>
                             </tr>
                         @endforelse
                     </tbody>

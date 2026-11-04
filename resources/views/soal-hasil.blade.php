@@ -16,7 +16,10 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider mt-1">Nilai</span>
             </div>
             <div>
-                <h3 class="text-base font-extrabold text-gray-900">Jawaban benar {{ $attempt->score }} dari {{ $attempt->total }} soal</h3>
+                <div class="flex items-center gap-2">
+                    <h3 class="text-base font-extrabold text-gray-900">Jawaban benar {{ $attempt->score }} dari {{ $attempt->total }} soal</h3>
+                    <x-difficulty-badge :level="$attempt->difficulty" />
+                </div>
                 <p class="text-xs text-gray-500 mt-0.5">
                     @if ($attempt->duration_seconds !== null)
                         Waktu pengerjaan {{ sprintf('%d:%02d', intdiv($attempt->duration_seconds, 60), $attempt->duration_seconds % 60) }} ·

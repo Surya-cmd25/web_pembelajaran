@@ -9,7 +9,9 @@ use App\Models\UserActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SoalController extends Controller
@@ -20,12 +22,13 @@ class SoalController extends Controller
     public const int DEFAULT_DURATION_MINUTES = 15;
 
     /**
-     * Show the quiz card; the details open in a popup before the student starts.
+     * Show the quiz card per difficulty level; the details open in a popup before the student starts.
      */
     public function index(Request $request): View
     {
         return view('soal', [
-            'questionCount' => McqQuestion::active()->count(),
+            'levels' => McqQuestion::DIFFICULTIES,
+            'counts' => $this->questionCounts(),
             'durationMinutes' => self::durationMinutes(),
             'description' => AppSetting::read('mcq_description', 'Jawab soal situasi sosial seputar nilai dan norma, lalu periksa pembahasannya.'),
             'attempts' => $request->user()->mcqAttempts()->latest('created_at')->take(5)->get(),
@@ -34,10 +37,19 @@ class SoalController extends Controller
 
     /**
      * Show the timed exam page without revealing the answers.
+     *
+     * The optional level query parameter narrows the exam to one difficulty level.
      */
     public function start(Request $request): View|RedirectResponse
     {
+        $level = $request->query('level');
+
+        if ($level !== null && (! is_string($level) || ! isset(McqQuestion::DIFFICULTIES[$level]))) {
+            return redirect()->route('soal')->with('status', 'Level soal tidak tersedia.');
+        }
+
         $questions = McqQuestion::active()
+            ->when($level !== null, fn ($query) => $query->difficulty($level))
             ->orderBy('sort_order')
             ->orderBy('id')
             ->get()
@@ -48,7 +60,9 @@ class SoalController extends Controller
             ]);
 
         if ($questions->isEmpty()) {
-            return redirect()->route('soal')->with('status', 'Belum ada soal tersedia.');
+            return redirect()
+                ->route('soal')
+                ->with('status', $level !== null ? 'Belum ada soal pada level ini.' : 'Belum ada soal tersedia.');
         }
 
         $request->session()->put('mcq_started_at', now()->timestamp);
@@ -56,6 +70,7 @@ class SoalController extends Controller
         return view('soal-kerjakan', [
             'questions' => $questions,
             'durationMinutes' => self::durationMinutes(),
+            'level' => $level,
         ]);
     }
 
@@ -69,12 +84,19 @@ class SoalController extends Controller
         $validated = $request->validate([
             'answers' => ['nullable', 'array'],
             'answers.*' => ['nullable', 'integer', 'min:0', 'max:3'],
+            'level' => ['nullable', 'string', Rule::in(array_keys(McqQuestion::DIFFICULTIES))],
         ]);
+
+        $level = $validated['level'] ?? null;
 
         $answers = collect($validated['answers'] ?? [])
             ->filter(fn ($value) => $value !== null && $value !== '');
 
-        $questions = McqQuestion::active()->orderBy('sort_order')->orderBy('id')->get();
+        $questions = McqQuestion::active()
+            ->when($level !== null, fn ($query) => $query->difficulty($level))
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get();
 
         if ($answers->keys()->diff($questions->pluck('id'))->isNotEmpty()) {
             return response()->json([
@@ -110,11 +132,12 @@ class SoalController extends Controller
             ? min(max(now()->timestamp - (int) $startedAt, 0), 65535)
             : null;
 
-        $attempt = DB::transaction(function () use ($request, $answers, $score, $review, $duration) {
+        $attempt = DB::transaction(function () use ($request, $answers, $score, $review, $duration, $level) {
             $attempt = McqAttempt::create([
                 'user_id' => $request->user()->id,
                 'score' => $score,
                 'total' => count($review),
+                'difficulty' => $level,
                 'answers' => $answers->all(),
                 'duration_seconds' => $duration,
                 'review' => $review,
@@ -149,5 +172,19 @@ class SoalController extends Controller
     public static function durationMinutes(): int
     {
         return max(1, (int) AppSetting::read('mcq_duration_minutes', (string) self::DEFAULT_DURATION_MINUTES));
+    }
+
+    /**
+     * Number of active questions available for every difficulty level.
+     *
+     * @return Collection<string, int>
+     */
+    private function questionCounts(): Collection
+    {
+        return McqQuestion::active()
+            ->selectRaw('difficulty, COUNT(*) as total')
+            ->groupBy('difficulty')
+            ->get()
+            ->pluck('total', 'difficulty');
     }
 }

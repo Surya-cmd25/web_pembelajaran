@@ -145,6 +145,7 @@ class AdminPanelTest extends TestCase
     {
         $this->actingAs($this->guru())->post(route('admin.soal-pilihan-ganda.store'), [
             'question' => 'Soal uji pilihan ganda?',
+            'difficulty' => 'sulit',
             'options' => ['A1', 'A2', 'A3', 'A4'],
             'correct_index' => 2,
             'explanation' => 'Karena itu jawabannya.',
@@ -154,8 +155,38 @@ class AdminPanelTest extends TestCase
 
         $this->assertDatabaseHas('mcq_questions', [
             'question' => 'Soal uji pilihan ganda?',
+            'difficulty' => 'sulit',
             'correct_index' => 2,
         ]);
+    }
+
+    public function test_guru_cannot_create_mcq_with_unknown_difficulty(): void
+    {
+        $this->actingAs($this->guru())->post(route('admin.soal-pilihan-ganda.store'), [
+            'question' => 'Soal dengan level ngawur?',
+            'difficulty' => 'expert',
+            'options' => ['A1', 'A2', 'A3', 'A4'],
+            'correct_index' => 1,
+            'sort_order' => 1,
+        ])->assertSessionHasErrors('difficulty');
+    }
+
+    public function test_guru_can_filter_questions_by_difficulty(): void
+    {
+        McqQuestion::factory()->create(['question' => 'Soal mudah sekali?', 'difficulty' => 'mudah']);
+        McqQuestion::factory()->create(['question' => 'Soal sulit sekali?', 'difficulty' => 'sulit']);
+
+        $guru = $this->guru();
+
+        $this->actingAs($guru)->get(route('admin.soal-pilihan-ganda.index', ['level' => 'mudah']))
+            ->assertOk()
+            ->assertSee('Soal mudah sekali?')
+            ->assertDontSee('Soal sulit sekali?');
+
+        $this->actingAs($guru)->get(route('admin.soal-pilihan-ganda.index'))
+            ->assertOk()
+            ->assertSee('Soal mudah sekali?')
+            ->assertSee('Soal sulit sekali?');
     }
 
     public function test_guru_can_review_recording(): void
