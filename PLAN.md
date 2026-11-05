@@ -1,7 +1,7 @@
 # SovNorm — Plan & Status Implementasi
 
 Aplikasi web pembelajaran **Pendidikan Pancasila & PPKn** untuk siswa SMA tentang
-**norma sosial**. Stack: Laravel 13 · Blade · Tailwind v4 · Alpine.js · Vite.
+**norma sosial**. Stack: Laravel 13 · Blade · Tailwind v4 · Vite (JS vanilla).
 
 Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand **SovNorm**.
 
@@ -14,8 +14,8 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 - [x] `materis` + `materi_reads` (progress baca) + `add_image_to_materis` (gambar materi)
 - [x] `concept_cards` (8 kartu materi interaktif)
 - [x] `recordings` (audio hafalan siswa, terlihat oleh guru)
-- [x] `norms` (4 norma: kesopanan, kesusilaan, kesantunan, ketertiban)
-- [x] `quiz_pairs` + `quiz_attempts` (quiz mencocokkan kata ↔ pengertian)
+- [x] `norms` (4 norma: agama, kesusilaan, kesopanan, hukum)
+- [x] `quiz_pairs` + `quiz_attempts` (quiz mencocokkan situasi ↔ norma; satu norma boleh dipakai beberapa situasi)
 - [x] `mcq_questions` + `mcq_attempts` — soal pilihan ganda, keduanya punya kolom `difficulty`
   (`mudah` / `sedang` / `sulit`) untuk kartu level & hasil pengerjaan
 - [x] `add_duration_review_to_mcq_attempts` — durasi pengerjaan + review jawaban
@@ -41,18 +41,18 @@ Tema biru (`#2563EB` / `#1D4ED8` / navy `#0F172A` / background `#F8FAFC`), brand
 - [x] **Galeri Empat Norma** — 4 kartu norma, popup/detail modal, ilustrasi SVG
 - [x] **Quiz Mencocokkan** — 3 pasangan per ronde, klik kiri–kanan untuk menggambar garis SVG, feedback hijau/merah, tombol "Acak Contoh Baru", skor server-side
 - [x] **Soal Pilihan Ganda** — 10 soal dibagi ke **3 kartu level kesulitan (Mudah / Sedang / Sulit)**; siswa memilih kartu lalu mengerjakan hanya soal level tersebut, navigasi antar soal, timer, skor akhir server-side (jawaban benar tidak pernah dikirim ke client sebelum submit), level dicatat di hasil & riwayat
-- [x] **Puzzle** — potret (default Émile Durkheim) terpotong 10 keping, drag & drop, s/d 5 level kesulitan, setelah selesai tampilkan gambar utuh + penjelasan
+- [x] **Puzzle** — s/d 5 level yang diatur guru (gambar, baris × kolom, batas waktu); level tinggi makin sedikit petunjuk; hitung mundur, rekor waktu, drag & drop, setelah selesai tampilkan gambar utuh + penjelasan. Label menu: "Puzzle"
 
 ### 4. Panel Admin (Guru)
 - [x] Dashboard — ringkasan statistik & aktivitas terbaru
-- [x] Kelola Materi — CRUD materi + upload audio (`storage/app/public/audio/materi`)
-- [x] Kelola Concept Card — 8 kartu flip untuk tiap materi
+- [x] Kelola Materi — CRUD materi + upload audio (`storage/app/public/audio/materi`) + gambar opsional
+- [x] Kelola Kartu Hafalan — kartu flip (depan/belakang, ikon, warna) untuk Setor Hafalan
 - [x] Kelola Empat Norma — CRUD norma + ilustrasi
 - [x] Kelola Quiz Pair — bank pasangan kata–pengertian
 - [x] Kelola Soal Pilihan Ganda — CRUD soal + pilihan + kunci + **level kesulitan**, filter tab per level, pengaturan durasi & keterangan soal, hasil/ekspor CSV per level
 - [x] Kelola Puzzle — s/d 5 level, upload gambar, atur baris × kolom & batas waktu
 - [x] Setor Hafalan — dengar rekaman audio siswa (`audio/hafalan`)
-- [x] Kelola User — lihat & atur siswa/guru
+- [x] Data Siswa — daftar siswa + statistik, ekspor nilai quiz & soal (CSV)
 
 ### 5. Desain & Branding
 - [x] Rebrand total dari oranye *Socius* → biru *SovNorm* (semua halaman termasuk guest & auth)
@@ -110,10 +110,10 @@ Interaksi murni-JS belum diverifikasi secara visual (otomasi test tidak mencakup
 Cara: jalankan `npm run dev` lalu buka `http://localhost:8000`.
 
 ### 4. Opsional / Nice-to-have
-- [ ] Ilustrasi SVG untuk tiap norma (sekarang hanya placeholder warna)
-- [ ] Notifikasi email ke guru saat siswa menyetor hafalan
-- [ ] Export nilai quiz & soal ke PDF (CSV untuk quiz & soal sudah ada di admin)
-- [ ] Halaman profil siswa (ganti nama, password)
+- [x] Ilustrasi SVG tiap norma (guru juga bisa mengunggah gambar sendiri)
+- [x] Notifikasi email ke guru saat siswa menyetor hafalan
+- [ ] Export nilai quiz & soal ke PDF (CSV sudah ada di admin)
+- [x] Halaman profil (ganti nama, email, password)
 
 ---
 
@@ -130,7 +130,8 @@ php artisan migrate:fresh --seed # reset database + data contoh
 ## Struktur Route Penting
 
 Lihat `routes/web.php` (78 route). Kelompok utama:
-- Guest: `/`, `/beranda`, `/materi`, `/galeri-norma`, `/quiz`, `/soal`, `/puzzle`
-- Auth: `/login`, `/register`
-- Admin (prefix `admin`, middleware `role:guru`): dashboard, materi, concept-cards,
-  norms, quiz-pairs, soal, recordings, users
+- Publik: `/` (landing), `/login`, `/register`
+- Siswa (middleware `auth`): `/beranda`, `/materi`, `/setor-hafalan`, `/galeri-norma`, `/quiz`,
+  `/soal` (+ `/soal/kerjakan`, `/soal/hasil/{id}`), `/puzzle`, `/profil`
+- Admin (prefix `admin`, middleware `role:guru`): dashboard, `materi`, `kartu-hafalan`, `norma`,
+  `pasangan-quiz`, `soal-pilihan-ganda` (+ `hasil`, `pengaturan`), `puzzle`, `hafalan`, `siswa`, `ekspor/*`

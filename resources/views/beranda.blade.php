@@ -306,7 +306,7 @@
                         Puzzle
                     </h3>
                     <p class="text-xs text-gray-500 leading-relaxed mt-1">
-                        Susun 10 keping puzzle untuk mengungkap tokoh sosiologi nilai dan norma.
+                        Susun keping puzzle untuk mengungkap tokoh sosiologi nilai dan norma.
                     </p>
                 </div>
 

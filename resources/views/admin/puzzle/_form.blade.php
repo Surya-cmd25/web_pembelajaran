@@ -21,7 +21,7 @@
         </div>
         <div>
             <label for="title" class="{{ $labelCls }}">Judul / Nama Gambar *</label>
-            <input type="text" name="title" id="title" required maxlength="150" value="{{ old('title', $level?->title) }}" placeholder="Contoh: Émile Durkheim (1858–1917)" class="{{ $inputCls }}">
+            <input type="text" name="title" id="title" required maxlength="150" value="{{ old('title', $level?->title) }}" placeholder="Contoh: Tokoh Sosiologi Nilai dan Norma" class="{{ $inputCls }}">
             @error('title')<p class="text-xs font-medium text-rose-600 mt-1.5">{{ $message }}</p>@enderror
         </div>
     </div>

@@ -12,7 +12,7 @@ class PuzzleLevelSeeder extends Seeder
      */
     public function run(): void
     {
-        $description = 'Émile Durkheim adalah sosiolog Prancis yang diakui sebagai bapak sosiologi modern. Ia memperkenalkan konsep solidaritas sosial dan anomie, serta menekankan bahwa norma sosial adalah kenyataan nyata yang mengikat individu.';
+        $description = 'Selamat! Kamu berhasil menyusun puzzle tokoh sosiologi nilai dan norma.';
 
         $levels = [
             1 => ['rows' => 2, 'cols' => 3, 'time_limit' => 300],
@@ -26,7 +26,7 @@ class PuzzleLevelSeeder extends Seeder
             PuzzleLevel::firstOrCreate(
                 ['level' => $number],
                 $config + [
-                    'title' => 'Émile Durkheim (1858–1917)',
+                    'title' => 'Tokoh Sosiologi Nilai dan Norma',
                     'description' => $description,
                     'is_active' => true,
                 ],
